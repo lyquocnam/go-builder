@@ -1,6 +1,22 @@
 package module
 
-import "github.com/vektra/gitreader"
+import (
+	"encoding/json"
+	"fmt"
+	"github.com/brentp/xopen"
+	"io/ioutil"
+	"log"
+	"os"
+)
+
+const (
+	DestFolder = "/Users/lynam/dev/go-builder/deploy"
+)
+
+type ListFile struct {
+	Name string `json:"name"`
+	Path string `json:"path"`
+}
 
 type downloader struct {
 
@@ -10,24 +26,55 @@ func NewDownloader() *downloader {
 	return &downloader{}
 }
 
-func (*downloader) Run() {
-	repo, err := gitreader.OpenRepo("/path/to/repo")
+func (s *downloader) Run() {
+	listUrl := "https://raw.githubusercontent.com/lyquocnam/go-builder/master/template/list.json"
+	data, err := s.downloadFile(listUrl)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 
-	blob, err := repo.CatFile("HEAD", "path/to/file")
-	if err != nil {
-		panic(err)
+	var list []ListFile
+	if err := json.Unmarshal(data, &list); err != nil {
+		log.Fatalln(err)
 	}
 
-	// WARNING: use Blob as an io.Reader instead if you can!
-	bytes, err := blob.Bytes()
-	if err != nil {
-		panic(err)
+	if len(list) <= 0 {
+		log.Println("No files in list")
+		return
 	}
 
-	fmt.Printf("%s", bytes)
+	s.createFolderIfNotExist(DestFolder)
 
-	repo.Close()
+	for _, fUrl := range list {
+		itemData, err := s.downloadFile(fUrl.Path)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		fileDest := fmt.Sprintf(`%s/%s`, DestFolder, fUrl.Name)
+
+		err = ioutil.WriteFile(fileDest, itemData, os.FileMode(0644))
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+}
+
+func (*downloader) downloadFile(url string) ([]byte, error) {
+	f, err := xopen.Ropen(url)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer f.Close()
+
+	return ioutil.ReadAll(f)
+}
+
+func (*downloader) saveFile(fileDest string, data []byte, ) error {
+	return ioutil.WriteFile(fileDest, data, os.FileMode(0644))
+}
+
+func (*downloader) createFolderIfNotExist(folderPath string) {
+	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
+		os.Mkdir(folderPath, os.ModePerm)
+	}
 }

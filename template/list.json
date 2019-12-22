@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Dockerfile",
+    "path": "https://raw.githubusercontent.com/lyquocnam/go-builder/master/docker/Dockerfile"
+  },
+  {
+    "name": "docker-compose.yml",
+    "path": "https://raw.githubusercontent.com/lyquocnam/go-builder/master/docker/docker-compose.yml"
+  },
+  {
+    "name": "README.md",
+    "path": "https://raw.githubusercontent.com/lyquocnam/go-builder/master/docker/README.md"
+  }
+]
