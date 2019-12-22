@@ -8,10 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-)
-
-const (
-	DestFolder = "/Users/lynam/dev/go-builder/deploy"
+	"path/filepath"
 )
 
 type ListFile struct {
@@ -60,10 +57,17 @@ func (s *downloader) Run(override bool) {
 		return
 	}
 
-	s.createFolderIfNotExist(DestFolder)
+	currentDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	currentDir = fmt.Sprintf(`%s/deploy`, currentDir)
+
+	s.createFolderIfNotExist(currentDir)
 
 	for _, fUrl := range list {
-		fileDest := fmt.Sprintf(`%s/%s`, DestFolder, fUrl.Name)
+		fileDest := fmt.Sprintf(`%s/%s`, currentDir, fUrl.Name)
 		// check exist
 		if !override && s.checkFileExist(fileDest) {
 			s.Warnf(`❌ '%s' skipped.`, fUrl.Name)
