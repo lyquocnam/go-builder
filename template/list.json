@@ -8,6 +8,14 @@
     "path": "https://raw.githubusercontent.com/lyquocnam/go-builder/master/template/docker/docker-compose.yml"
   },
   {
+    "name": "docker-compose.override.yml",
+    "path": "https://raw.githubusercontent.com/lyquocnam/go-builder/master/template/docker/docker-compose.override.yml"
+  },
+  {
+    "name": "docker-compose.prod.yml",
+    "path": "https://raw.githubusercontent.com/lyquocnam/go-builder/master/template/docker/docker-compose.prod.yml"
+  },
+  {
     "name": "README.md",
     "path": "https://raw.githubusercontent.com/lyquocnam/go-builder/master/template/docker/README.md"
   }

@@ -18,27 +18,22 @@ RUN go mod download
 
 COPY . .
 
-# it will take the flags from the environment
-RUN go build -o myapp
+RUN go build -o app
+
 
 FROM alpine:latest as alpine
 RUN apk --no-cache add tzdata zip ca-certificates
 WORKDIR /usr/share/zoneinfo
-# -0 means no compression.  Needed because go's
-# tz loader doesn't handle compressed data.
 RUN zip -r -0 /zoneinfo.zip .
 
 FROM scratch
 WORKDIR /app
-# the test program:
-COPY --from=builder /build /app/
-# the timezone data:
+
 ENV ZONEINFO=/zoneinfo.zip \
     TZ=Asia/Saigon
 
+COPY --from=builder /build /app/
 COPY --from=alpine /zoneinfo.zip /
-# the tls certificates:
 COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-ENTRYPOINT ["./myapp", "serve"]
 
-ENTRYPOINT ["./myapp", "serve"]
+ENTRYPOINT ["./app", "serve"]

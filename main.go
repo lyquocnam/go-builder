@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/lyquocnam/go-builder/module"
 	"github.com/spf13/cobra"
+	"log"
 )
 
 func main() {
@@ -11,9 +12,16 @@ func main() {
 		Short:                      "Download template",
 		Long:                       "Download template",
 		Run: func(cmd *cobra.Command, args []string) {
-			module.NewDownloader().Run()
+			forceOverride, err := cmd.Flags().GetBool("force")
+			if err != nil {
+				log.Fatalln(err)
+			}
+
+			module.NewDownloader().Run(forceOverride)
 		},
 	}
+
+	downloadCmd.Flags().BoolP("force", "f", false,"force override written file")
 
 	rootCmd := &cobra.Command{
 		Short:                      "Command:",

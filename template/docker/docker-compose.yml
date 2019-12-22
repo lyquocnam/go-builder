@@ -1,39 +1,6 @@
 version: "3.7"
+
 services:
-
-  app:
-    image: lynam/go-oauth
-    container_name: go-oauth
-    restart: on-failure
-    ports:
-    - 5001:5001
-#    build:
-#      context: ../
-#      dockerfile: ./docker/Dockerfile
-#      args:
-#        GITHUB_TOKEN: "d7519779515245e32e346444a458377f501b70b0"
-    links:
-      - redis-service
-      - mysql-service
-      - nat-service
-    env_file:
-      - ../.env
-    environment:
-      DB_HOST: mysql-service
-      DB_PORT: 3306
-      DB_NAME: blog
-      DB_USER:  admin
-      DB_PASSWORD: admin
-      REDIS_URL: redis-service:6379
-      NAT_URL: nat-service
-      APP_PORT: 5001
-    networks:
-      - backend
-    depends_on:
-      - redis-service
-      - mysql-service
-      - nat-service
-
   redis-service:
     image: redis:alpine
     container_name: redis

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/brentp/xopen"
+	"github.com/labstack/gommon/color"
 	"io/ioutil"
 	"log"
 	"os"
@@ -19,14 +20,30 @@ type ListFile struct {
 }
 
 type downloader struct {
-
+	logger *color.Color
 }
 
 func NewDownloader() *downloader {
-	return &downloader{}
+	logger := color.New()
+	logger.SetOutput(log.Writer())
+
+	return &downloader{
+		logger: logger,
+	}
 }
 
-func (s *downloader) Run() {
+func (s *downloader) Infof(format string, params ...interface{}) {
+	msg := fmt.Sprintf(format, params...)
+	s.logger.Println(s.logger.Green(msg))
+}
+
+func (s *downloader) Warnf(format string, params ...interface{}) {
+	msg := fmt.Sprintf(format, params...)
+	s.logger.Println(s.logger.Yellow(msg))
+}
+
+
+func (s *downloader) Run(override bool) {
 	listUrl := "https://raw.githubusercontent.com/lyquocnam/go-builder/master/template/list.json"
 	data, err := s.downloadFile(listUrl)
 	if err != nil {
@@ -46,16 +63,24 @@ func (s *downloader) Run() {
 	s.createFolderIfNotExist(DestFolder)
 
 	for _, fUrl := range list {
+		fileDest := fmt.Sprintf(`%s/%s`, DestFolder, fUrl.Name)
+		// check exist
+		if override && s.checkFileExist(fileDest) {
+			s.Warnf(`❌ '%s' skipped.`, fUrl.Name)
+			continue
+		}
+
 		itemData, err := s.downloadFile(fUrl.Path)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		fileDest := fmt.Sprintf(`%s/%s`, DestFolder, fUrl.Name)
 
 		err = ioutil.WriteFile(fileDest, itemData, os.FileMode(0644))
 		if err != nil {
 			log.Fatalln(err)
 		}
+
+		s.Infof(`🍀 Downloaded '%s'`, fUrl.Name)
 	}
 }
 
@@ -77,4 +102,11 @@ func (*downloader) createFolderIfNotExist(folderPath string) {
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
 		os.Mkdir(folderPath, os.ModePerm)
 	}
+}
+
+func (*downloader) checkFileExist(dest string) bool {
+	if _, err := os.Stat(dest); err != nil {
+		return false
+	}
+	return true
 }
