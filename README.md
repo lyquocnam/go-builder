@@ -1,6 +1,9 @@
-### Build
+### Docker commands:
 ```
-go build -o builder 
+./builder build -t lynam/go-oauth
+```
+```
+./builder run -n go-oauth
 ```
 
 ### Run

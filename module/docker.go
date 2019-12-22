@@ -2,12 +2,12 @@ package module
 
 import (
 	"fmt"
-	"log"
 	"os/exec"
 )
 
 type Docker interface {
-	Build(tagName string)
+	BuildDev(tagName string)
+	BuildProd(tagName string)
 	Run(serviceName string)
 	Execute(cm string)
 }
@@ -20,12 +20,19 @@ func NewDocker(logger Logger) *docker {
 	return &docker{logger: logger}
 }
 
-func (s *docker) Build(tagName string) {
-	cm := fmt.Sprintf(`docker build \
--f deploy/Dockerfile \
--t %s \
---build-arg GITHUB_TOKEN=d7519779515245e32e346444a458377f501b70b0 \
-.`, tagName)
+func (s *docker) BuildDev(tagName string) {
+	cm := fmt.Sprintf(`docker-compose -f deploy/docker-compose.yml \
+-f deploy/docker-compose.override.yml \
+run --name %s \
+-d go-oauth`, tagName)
+	s.Execute(cm)
+}
+
+func (s *docker) BuildProd(tagName string) {
+	cm := fmt.Sprintf(`docker-compose -f deploy/docker-compose.yml \
+-f deploy/docker-compose.prod.yml \
+run --name %s \
+-d go-oauth`, tagName)
 	s.Execute(cm)
 }
 
@@ -39,8 +46,7 @@ run --name %s \
 }
 
 func (s *docker) Execute(cmdStr string) {
-	log.Println(`Executing command:`)
-	log.Println(cmdStr)
+	fmt.Println(cmdStr)
 
 	out, err := exec.Command("/bin/sh", "-c", cmdStr).Output()
 	if err != nil {

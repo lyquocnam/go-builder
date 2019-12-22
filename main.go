@@ -52,12 +52,22 @@ func dockerBuildCommand() *cobra.Command {
 				log.Fatalln(err)
 			}
 
+			mode, err := cmd.Flags().GetString("mode")
+			if err != nil {
+				log.Fatalln(err)
+			}
 			logger := module.NewLogger()
-			module.NewDocker(logger).Build(tagName)
+			docker := module.NewDocker(logger)
+			if mode == "development" {
+				docker.BuildDev(tagName)
+			} else if mode == "production" {
+				docker.BuildProd(tagName)
+			}
 		},
 	}
 
 	cmd.Flags().StringP("tag", "t", "","docker tag name")
+	cmd.Flags().StringP("mode", "m", "development","environment mode, default: development")
 
 	return cmd
 }
