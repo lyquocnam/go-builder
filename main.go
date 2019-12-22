@@ -7,6 +7,20 @@ import (
 )
 
 func main() {
+	rootCmd := &cobra.Command{
+		Short:                      "Command:",
+		Long:                       "Command:",
+	}
+
+	rootCmd.AddCommand(downloadCommand())
+	rootCmd.AddCommand(dockerBuildCommand())
+	rootCmd.AddCommand(dockerRunCommand())
+
+	rootCmd.Execute()
+}
+
+
+func downloadCommand() *cobra.Command {
 	downloadCmd := &cobra.Command{
 		Use: "download",
 		Short:                      "Download template",
@@ -17,18 +31,55 @@ func main() {
 				log.Fatalln(err)
 			}
 
-			module.NewDownloader().Run(forceOverride)
+			logger := module.NewLogger()
+			module.NewDownloader(logger).Run(forceOverride)
 		},
 	}
 
 	downloadCmd.Flags().BoolP("force", "f", false,"force override written file")
 
-	rootCmd := &cobra.Command{
-		Short:                      "Command:",
-		Long:                       "Command:",
+	return downloadCmd
+}
+
+func dockerBuildCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "build",
+		Short:                      "Build app from docker template",
+		Long:                       "Build app from docker template",
+		Run: func(cmd *cobra.Command, args []string) {
+			tagName, err := cmd.Flags().GetString("tag")
+			if err != nil {
+				log.Fatalln(err)
+			}
+
+			logger := module.NewLogger()
+			module.NewDocker(logger).Build(tagName)
+		},
 	}
 
-	rootCmd.AddCommand(downloadCmd)
+	cmd.Flags().StringP("tag", "t", "","docker tag name")
 
-	rootCmd.Execute()
+	return cmd
+}
+
+
+func dockerRunCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "run",
+		Short:                      "Run app from docker",
+		Long:                       "Run app from docker",
+		Run: func(cmd *cobra.Command, args []string) {
+			serviceName, err := cmd.Flags().GetString("name")
+			if err != nil {
+				log.Fatalln(err)
+			}
+
+			logger := module.NewLogger()
+			module.NewDocker(logger).Run(serviceName)
+		},
+	}
+
+	cmd.Flags().StringP("name", "n", "","docker service name")
+
+	return cmd
 }

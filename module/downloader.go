@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/brentp/xopen"
-	"github.com/labstack/gommon/color"
 	"io/ioutil"
 	"log"
 	"os"
@@ -17,26 +16,13 @@ type ListFile struct {
 }
 
 type downloader struct {
-	logger *color.Color
+	logger Logger
 }
 
-func NewDownloader() *downloader {
-	logger := color.New()
-	logger.SetOutput(log.Writer())
-
+func NewDownloader(logger Logger) *downloader {
 	return &downloader{
 		logger: logger,
 	}
-}
-
-func (s *downloader) Infof(format string, params ...interface{}) {
-	msg := fmt.Sprintf(format, params...)
-	s.logger.Println(s.logger.Green(msg))
-}
-
-func (s *downloader) Warnf(format string, params ...interface{}) {
-	msg := fmt.Sprintf(format, params...)
-	s.logger.Println(s.logger.Yellow(msg))
 }
 
 
@@ -70,7 +56,7 @@ func (s *downloader) Run(override bool) {
 		fileDest := fmt.Sprintf(`%s/%s`, currentDir, fUrl.Name)
 		// check exist
 		if !override && s.checkFileExist(fileDest) {
-			s.Warnf(`❌ '%s' skipped.`, fUrl.Name)
+			s.logger.Warnf(`❌ '%s' skipped.`, fUrl.Name)
 			continue
 		}
 
@@ -84,7 +70,7 @@ func (s *downloader) Run(override bool) {
 			log.Fatalln(err)
 		}
 
-		s.Infof(`🍀 Downloaded '%s'`, fileDest)
+		s.logger.Infof(`🍀 Downloaded '%s'`, fileDest)
 	}
 }
 
