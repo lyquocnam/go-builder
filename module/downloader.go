@@ -65,7 +65,7 @@ func (s *downloader) Run(override bool) {
 	for _, fUrl := range list {
 		fileDest := fmt.Sprintf(`%s/%s`, DestFolder, fUrl.Name)
 		// check exist
-		if override && s.checkFileExist(fileDest) {
+		if !override && s.checkFileExist(fileDest) {
 			s.Warnf(`❌ '%s' skipped.`, fUrl.Name)
 			continue
 		}
@@ -80,7 +80,7 @@ func (s *downloader) Run(override bool) {
 			log.Fatalln(err)
 		}
 
-		s.Infof(`🍀 Downloaded '%s'`, fUrl.Name)
+		s.Infof(`🍀 Downloaded '%s'`, fileDest)
 	}
 }
 
