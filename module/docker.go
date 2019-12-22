@@ -50,6 +50,10 @@ func (s *docker) Execute(cmdStr string) {
 
 	out, err := exec.Command("/bin/sh", "-c", cmdStr).Output()
 	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			s.logger.Warnf(string(exitErr.Stderr))
+			return
+		}
 		s.logger.Warnf(err.Error())
 	} else {
 		s.logger.Infof(string(out))
