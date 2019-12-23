@@ -34,7 +34,7 @@ func (s *docker) RunDev(serviceName string) {
 	cm := fmt.Sprintf(`docker-compose -f deploy/docker-compose.yml \
 -f deploy/docker-compose.override.yml \
 run --name %s \
--d go-oauth`, serviceName)
+-d %s`, serviceName, serviceName)
 
 	s.Execute(cm)
 }
@@ -44,7 +44,7 @@ func (s *docker) RunProd(serviceName string) {
 	cm := fmt.Sprintf(`docker-compose -f deploy/docker-compose.yml \
 -f deploy/docker-compose.prod.yml \
 run --name %s \
--d go-oauth`, serviceName)
+-d %s`, serviceName, serviceName)
 
 	s.Execute(cm)
 }
